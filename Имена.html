@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Имена</title>
+<style>
+    :root { --accent: #2ecc71; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 10px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; touch-action: none; }
+    header { flex: 0 0 auto; text-align: center; margin-bottom: 15px; }
+    h2 { margin: 5px 0; color: #2c3e50; font-size: 1.4rem; }
+    .status { font-size: 0.9rem; color: #777; }
+    .game-container { flex: 1; display: flex; gap: 30px; padding: 10px; justify-content: center; align-items: center; }
+    .word-list { display: flex; flex-direction: column; gap: 5px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); min-width: 180px; max-height: 80vh; overflow-y: auto; }
+    .word-item { padding: 6px 10px; border-radius: 4px; font-weight: 600; color: #34495e; font-size: 0.95rem; }
+    .word-item.found { text-decoration: line-through; color: #bbb; background: #f9f9f9; }
+    .grid-wrapper { position: relative; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); user-select: none; max-width: 100%; max-height: 80vh; aspect-ratio: 15 / 15; }
+    .grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 2px; width: 100%; height: 100%; }
+    .cell { display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: clamp(12px, 2.5vw, 24px); color: #2c3e50; cursor: pointer; text-transform: uppercase; border-radius: 4px; aspect-ratio: 1; }
+    #selection-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+    @media (max-width: 800px) {
+        body { padding: 5px; }
+        .game-container { flex-direction: column-reverse; justify-content: flex-end; gap: 15px; padding-bottom: 20px; }
+        .word-list { width: 100%; min-height: 60px; max-height: 120px; flex-direction: row; flex-wrap: wrap; justify-content: center; }
+        .word-item { font-size: 0.8rem; border: 1px solid #eee; padding: 4px 8px; }
+        .grid-wrapper { width: 100%; height: auto; max-height: 60vh; aspect-ratio: 15 / 15; }
+    }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+    .modal-content { background: white; padding: 30px; border-radius: 15px; text-align: center; animation: popIn 0.3s; }
+    @keyframes popIn { from {transform: scale(0.8); opacity:0;} to {transform: scale(1); opacity:1;} }
+    .btn-reset { background: #2ecc71; color: white; border: none; padding: 10px 25px; border-radius: 25px; font-size: 1.1rem; cursor: pointer; margin-top: 15px; }
+</style>
+</head>
+<body>
+<header><h2>Имена</h2><div class="status">Найдено: <span id="score">0</span> / <span id="total">6</span></div></header>
+<div class="game-container">
+    <div class="grid-wrapper" id="gridWrapper">
+        <canvas id="selection-canvas"></canvas>
+        <div class="grid" id="grid">
+            <div class="cell" data-idx="0" data-char="Б">Б</div><div class="cell" data-idx="1" data-char="В">В</div><div class="cell" data-idx="2" data-char="Ф">Ф</div><div class="cell" data-idx="3" data-char="З">З</div><div class="cell" data-idx="4" data-char="О">О</div><div class="cell" data-idx="5" data-char="Ё">Ё</div><div class="cell" data-idx="6" data-char="Ъ">Ъ</div><div class="cell" data-idx="7" data-char="Т">Т</div><div class="cell" data-idx="8" data-char="Ц">Ц</div><div class="cell" data-idx="9" data-char="Й">Й</div><div class="cell" data-idx="10" data-char="Ч">Ч</div><div class="cell" data-idx="11" data-char="У">У</div><div class="cell" data-idx="12" data-char="У">У</div><div class="cell" data-idx="13" data-char="Ц">Ц</div><div class="cell" data-idx="14" data-char="Е">Е</div><div class="cell" data-idx="15" data-char="Ь">Ь</div><div class="cell" data-idx="16" data-char="Й">Й</div><div class="cell" data-idx="17" data-char="О">О</div><div class="cell" data-idx="18" data-char="Ь">Ь</div><div class="cell" data-idx="19" data-char="Ё">Ё</div><div class="cell" data-idx="20" data-char="Х">Х</div><div class="cell" data-idx="21" data-char="Р">Р</div><div class="cell" data-idx="22" data-char="М">М</div><div class="cell" data-idx="23" data-char="Л">Л</div><div class="cell" data-idx="24" data-char="Ы">Ы</div><div class="cell" data-idx="25" data-char="У">У</div><div class="cell" data-idx="26" data-char="Я">Я</div><div class="cell" data-idx="27" data-char="Ё">Ё</div><div class="cell" data-idx="28" data-char="К">К</div><div class="cell" data-idx="29" data-char="Ф">Ф</div><div class="cell" data-idx="30" data-char="Л">Л</div><div class="cell" data-idx="31" data-char="З">З</div><div class="cell" data-idx="32" data-char="Ь">Ь</div><div class="cell" data-idx="33" data-char="С">С</div><div class="cell" data-idx="34" data-char="А">А</div><div class="cell" data-idx="35" data-char="М">М</div><div class="cell" data-idx="36" data-char="И">И</div><div class="cell" data-idx="37" data-char="Н">Н</div><div class="cell" data-idx="38" data-char="А">А</div><div class="cell" data-idx="39" data-char="Ш">Ш</div><div class="cell" data-idx="40" data-char="Щ">Щ</div><div class="cell" data-idx="41" data-char="З">З</div><div class="cell" data-idx="42" data-char="Ь">Ь</div><div class="cell" data-idx="43" data-char="Х">Х</div><div class="cell" data-idx="44" data-char="Й">Й</div><div class="cell" data-idx="45" data-char="Ё">Ё</div><div class="cell" data-idx="46" data-char="Б">Б</div><div class="cell" data-idx="47" data-char="Р">Р</div><div class="cell" data-idx="48" data-char="Я">Я</div><div class="cell" data-idx="49" data-char="Д">Д</div><div class="cell" data-idx="50" data-char="Л">Л</div><div class="cell" data-idx="51" data-char="И">И</div><div class="cell" data-idx="52" data-char="Е">Е</div><div class="cell" data-idx="53" data-char="Т">Т</div><div class="cell" data-idx="54" data-char="А">А</div><div class="cell" data-idx="55" data-char="Г">Г</div><div class="cell" data-idx="56" data-char="И">И</div><div class="cell" data-idx="57" data-char="Р">Р</div><div class="cell" data-idx="58" data-char="Д">Д</div><div class="cell" data-idx="59" data-char="Т">Т</div><div class="cell" data-idx="60" data-char="Э">Э</div><div class="cell" data-idx="61" data-char="С">С</div><div class="cell" data-idx="62" data-char="М">М</div><div class="cell" data-idx="63" data-char="А">А</div><div class="cell" data-idx="64" data-char="М">М</div><div class="cell" data-idx="65" data-char="А">А</div><div class="cell" data-idx="66" data-char="Л">Л</div><div class="cell" data-idx="67" data-char="Ь">Ь</div><div class="cell" data-idx="68" data-char="О">О</div><div class="cell" data-idx="69" data-char="М">М</div><div class="cell" data-idx="70" data-char="П">П</div><div class="cell" data-idx="71" data-char="Ц">Ц</div><div class="cell" data-idx="72" data-char="Ф">Ф</div><div class="cell" data-idx="73" data-char="Я">Я</div><div class="cell" data-idx="74" data-char="Ц">Ц</div><div class="cell" data-idx="75" data-char="Я">Я</div><div class="cell" data-idx="76" data-char="Н">Н</div><div class="cell" data-idx="77" data-char="Ю">Ю</div><div class="cell" data-idx="78" data-char="Ь">Ь</div><div class="cell" data-idx="79" data-char="Ь">Ь</div><div class="cell" data-idx="80" data-char="Х">Х</div><div class="cell" data-idx="81" data-char="Н">Н</div><div class="cell" data-idx="82" data-char="Я">Я</div><div class="cell" data-idx="83" data-char="К">К</div><div class="cell" data-idx="84" data-char="Т">Т</div><div class="cell" data-idx="85" data-char="И">И</div><div class="cell" data-idx="86" data-char="Э">Э</div><div class="cell" data-idx="87" data-char="К">К</div><div class="cell" data-idx="88" data-char="Н">Н</div><div class="cell" data-idx="89" data-char="Л">Л</div><div class="cell" data-idx="90" data-char="Х">Х</div><div class="cell" data-idx="91" data-char="У">У</div><div class="cell" data-idx="92" data-char="П">П</div><div class="cell" data-idx="93" data-char="З">З</div><div class="cell" data-idx="94" data-char="А">А</div><div class="cell" data-idx="95" data-char="Л">Л</div><div class="cell" data-idx="96" data-char="А">А</div><div class="cell" data-idx="97" data-char="Ё">Ё</div><div class="cell" data-idx="98" data-char="П">П</div><div class="cell" data-idx="99" data-char="А">А</div><div class="cell" data-idx="100" data-char="Е">Е</div><div class="cell" data-idx="101" data-char="Ч">Ч</div><div class="cell" data-idx="102" data-char="В">В</div><div class="cell" data-idx="103" data-char="Е">Е</div><div class="cell" data-idx="104" data-char="Ю">Ю</div><div class="cell" data-idx="105" data-char="Г">Г</div><div class="cell" data-idx="106" data-char="Й">Й</div><div class="cell" data-idx="107" data-char="Э">Э</div><div class="cell" data-idx="108" data-char="Т">Т</div><div class="cell" data-idx="109" data-char="Л">Л</div><div class="cell" data-idx="110" data-char="Ц">Ц</div><div class="cell" data-idx="111" data-char="В">В</div><div class="cell" data-idx="112" data-char="Б">Б</div><div class="cell" data-idx="113" data-char="Р">Р</div><div class="cell" data-idx="114" data-char="Э">Э</div><div class="cell" data-idx="115" data-char="Ь">Ь</div><div class="cell" data-idx="116" data-char="Ч">Ч</div><div class="cell" data-idx="117" data-char="Д">Д</div><div class="cell" data-idx="118" data-char="Ь">Ь</div><div class="cell" data-idx="119" data-char="У">У</div><div class="cell" data-idx="120" data-char="И">И</div><div class="cell" data-idx="121" data-char="Щ">Щ</div><div class="cell" data-idx="122" data-char="Я">Я</div><div class="cell" data-idx="123" data-char="Ф">Ф</div><div class="cell" data-idx="124" data-char="А">А</div><div class="cell" data-idx="125" data-char="Ш">Ш</div><div class="cell" data-idx="126" data-char="Э">Э</div><div class="cell" data-idx="127" data-char="Н">Н</div><div class="cell" data-idx="128" data-char="Ц">Ц</div><div class="cell" data-idx="129" data-char="С">С</div><div class="cell" data-idx="130" data-char="Л">Л</div><div class="cell" data-idx="131" data-char="Й">Й</div><div class="cell" data-idx="132" data-char="Ю">Ю</div><div class="cell" data-idx="133" data-char="Ш">Ш</div><div class="cell" data-idx="134" data-char="Х">Х</div><div class="cell" data-idx="135" data-char="Х">Х</div><div class="cell" data-idx="136" data-char="Ф">Ф</div><div class="cell" data-idx="137" data-char="Ь">Ь</div><div class="cell" data-idx="138" data-char="Ы">Ы</div><div class="cell" data-idx="139" data-char="Н">Н</div><div class="cell" data-idx="140" data-char="И">И</div><div class="cell" data-idx="141" data-char="Б">Б</div><div class="cell" data-idx="142" data-char="Ё">Ё</div><div class="cell" data-idx="143" data-char="Н">Н</div><div class="cell" data-idx="144" data-char="А">А</div><div class="cell" data-idx="145" data-char="Ы">Ы</div><div class="cell" data-idx="146" data-char="Х">Х</div><div class="cell" data-idx="147" data-char="Д">Д</div><div class="cell" data-idx="148" data-char="Й">Й</div><div class="cell" data-idx="149" data-char="О">О</div><div class="cell" data-idx="150" data-char="Ы">Ы</div><div class="cell" data-idx="151" data-char="Ж">Ж</div><div class="cell" data-idx="152" data-char="М">М</div><div class="cell" data-idx="153" data-char="Н">Н</div><div class="cell" data-idx="154" data-char="Ы">Ы</div><div class="cell" data-idx="155" data-char="Ц">Ц</div><div class="cell" data-idx="156" data-char="И">И</div><div class="cell" data-idx="157" data-char="О">О</div><div class="cell" data-idx="158" data-char="З">З</div><div class="cell" data-idx="159" data-char="Я">Я</div><div class="cell" data-idx="160" data-char="Э">Э</div><div class="cell" data-idx="161" data-char="Ф">Ф</div><div class="cell" data-idx="162" data-char="Ф">Ф</div><div class="cell" data-idx="163" data-char="Р">Р</div><div class="cell" data-idx="164" data-char="Ю">Ю</div><div class="cell" data-idx="165" data-char="У">У</div><div class="cell" data-idx="166" data-char="О">О</div><div class="cell" data-idx="167" data-char="Ч">Ч</div><div class="cell" data-idx="168" data-char="П">П</div><div class="cell" data-idx="169" data-char="Й">Й</div><div class="cell" data-idx="170" data-char="С">С</div><div class="cell" data-idx="171" data-char="К">К</div><div class="cell" data-idx="172" data-char="М">М</div><div class="cell" data-idx="173" data-char="Ё">Ё</div><div class="cell" data-idx="174" data-char="У">У</div><div class="cell" data-idx="175" data-char="К">К</div><div class="cell" data-idx="176" data-char="Ш">Ш</div><div class="cell" data-idx="177" data-char="Д">Д</div><div class="cell" data-idx="178" data-char="Ы">Ы</div><div class="cell" data-idx="179" data-char="Щ">Щ</div><div class="cell" data-idx="180" data-char="Ж">Ж</div><div class="cell" data-idx="181" data-char="К">К</div><div class="cell" data-idx="182" data-char="И">И</div><div class="cell" data-idx="183" data-char="Л">Л</div><div class="cell" data-idx="184" data-char="К">К</div><div class="cell" data-idx="185" data-char="Э">Э</div><div class="cell" data-idx="186" data-char="Ю">Ю</div><div class="cell" data-idx="187" data-char="Ь">Ь</div><div class="cell" data-idx="188" data-char="С">С</div><div class="cell" data-idx="189" data-char="У">У</div><div class="cell" data-idx="190" data-char="С">С</div><div class="cell" data-idx="191" data-char="С">С</div><div class="cell" data-idx="192" data-char="Я">Я</div><div class="cell" data-idx="193" data-char="К">К</div><div class="cell" data-idx="194" data-char="Х">Х</div><div class="cell" data-idx="195" data-char="Я">Я</div><div class="cell" data-idx="196" data-char="О">О</div><div class="cell" data-idx="197" data-char="О">О</div><div class="cell" data-idx="198" data-char="И">И</div><div class="cell" data-idx="199" data-char="А">А</div><div class="cell" data-idx="200" data-char="Э">Э</div><div class="cell" data-idx="201" data-char="М">М</div><div class="cell" data-idx="202" data-char="И">И</div><div class="cell" data-idx="203" data-char="Н">Н</div><div class="cell" data-idx="204" data-char="А">А</div><div class="cell" data-idx="205" data-char="З">З</div><div class="cell" data-idx="206" data-char="Ж">Ж</div><div class="cell" data-idx="207" data-char="Ч">Ч</div><div class="cell" data-idx="208" data-char="Л">Л</div><div class="cell" data-idx="209" data-char="Ц">Ц</div><div class="cell" data-idx="210" data-char="Э">Э</div><div class="cell" data-idx="211" data-char="К">К</div><div class="cell" data-idx="212" data-char="Д">Д</div><div class="cell" data-idx="213" data-char="А">А</div><div class="cell" data-idx="214" data-char="Н">Н</div><div class="cell" data-idx="215" data-char="И">И</div><div class="cell" data-idx="216" data-char="Э">Э</div><div class="cell" data-idx="217" data-char="Л">Л</div><div class="cell" data-idx="218" data-char="Ь">Ь</div><div class="cell" data-idx="219" data-char="М">М</div><div class="cell" data-idx="220" data-char="Ц">Ц</div><div class="cell" data-idx="221" data-char="Ч">Ч</div><div class="cell" data-idx="222" data-char="Х">Х</div><div class="cell" data-idx="223" data-char="Г">Г</div><div class="cell" data-idx="224" data-char="П">П</div>
+        </div>
+    </div>
+    <div class="word-list">
+        <div class="word-item" data-word="ДАНИЭЛЬ">ДАНИЭЛЬ</div><div class="word-item" data-word="САМИНА">САМИНА</div><div class="word-item" data-word="ТАГИР">ТАГИР</div><div class="word-item" data-word="АМАЛЬ">АМАЛЬ</div><div class="word-item" data-word="ЭМИНА">ЭМИНА</div><div class="word-item" data-word="АЛАН">АЛАН</div>
+    </div>
+</div>
+<div class="modal" id="winModal"><div class="modal-content"><h2>🎉 Отлично!</h2><p>Вы нашли все слова!</p><button class="btn-reset" onclick="location.reload()">Ещё раз</button></div></div>
+<script>
+    const gridEl = document.getElementById('grid');
+    const canvas = document.getElementById('selection-canvas');
+    const ctx = canvas.getContext('2d');
+    const width = 15;
+    const words = [{"word":"ДАНИЭЛЬ","found":false},{"word":"САМИНА","found":false},{"word":"ТАГИР","found":false},{"word":"АМАЛЬ","found":false},{"word":"ЭМИНА","found":false},{"word":"АЛАН","found":false}];
+    let foundCount = 0; let isSelecting = false; let startIdx = -1; let endIdx = -1;
+    
+    function resizeCanvas() {
+        const rect = gridEl.getBoundingClientRect();
+        canvas.width = rect.width; canvas.height = rect.height;
+        drawFoundLines();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    setTimeout(resizeCanvas, 300);
+
+    function getCoords(idx) { return { x: idx % width, y: Math.floor(idx / width) }; }
+    function getIdx(x, y) { return y * width + x; }
+    
+    // МАТЕМАТИЧЕСКИЙ РАСЧЕТ ЦЕНТРА (FIX)
+    function getCellCenter(idx) {
+        const coords = getCoords(idx);
+        const rows = gridEl.children.length / width;
+        const cellW = canvas.width / width;
+        const cellH = canvas.height / rows;
+        return { x: coords.x * cellW + (cellW / 2), y: coords.y * cellH + (cellH / 2) };
+    }
+
+    function startSelection(e) { e.preventDefault(); const cell = e.target.closest('.cell'); if (!cell) return; isSelecting = true; startIdx = parseInt(cell.dataset.idx); updateSelection(e); }
+    function moveSelection(e) { if (!isSelecting) return; e.preventDefault(); updateSelection(e); }
+    function endSelection(e) { if (!isSelecting) return; isSelecting = false; checkWord(); drawFoundLines(); }
+
+    function updateSelection(e) {
+        let clientX, clientY;
+        if(e.touches) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; } else { clientX = e.clientX; clientY = e.clientY; }
+        const target = document.elementFromPoint(clientX, clientY);
+        if (!target) return; const cell = target.closest('.cell'); if (!cell) return;
+        const currentIdx = parseInt(cell.dataset.idx);
+        const start = getCoords(startIdx); const curr = getCoords(currentIdx);
+        const dx = curr.x - start.x; const dy = curr.y - start.y;
+        if (dx === 0 || dy === 0 || Math.abs(dx) === Math.abs(dy)) { endIdx = currentIdx; drawPreview(startIdx, endIdx); }
+    }
+
+    function drawPreview(sIdx, eIdx) {
+        ctx.clearRect(0,0, canvas.width, canvas.height); drawFoundLines();
+        const p1 = getCellCenter(sIdx); const p2 = getCellCenter(eIdx);
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = 'rgba(52, 152, 219, 0.5)';
+        ctx.lineWidth = (canvas.width / width) * 0.6; ctx.lineCap = 'round'; ctx.stroke();
+    }
+
+    function checkWord() {
+        if (startIdx === -1 || endIdx === -1) return;
+        const start = getCoords(startIdx); const end = getCoords(endIdx);
+        const dx = Math.sign(end.x - start.x); const dy = Math.sign(end.y - start.y);
+        const len = Math.max(Math.abs(end.x - start.x), Math.abs(end.y - start.y));
+        let selectedWord = "", indices = [];
+        for (let i = 0; i <= len; i++) {
+            const idx = getIdx(start.x + i * dx, start.y + i * dy);
+            selectedWord += gridEl.children[idx].dataset.char; indices.push(idx);
+        }
+        const reversedWord = selectedWord.split('').reverse().join('');
+        const foundObj = words.find(w => !w.found && (w.word === selectedWord || w.word === reversedWord));
+        if (foundObj) {
+            foundObj.found = true; foundObj.indices = indices;
+            const listItem = document.querySelector(`.word-item[data-word="${foundObj.word}"]`);
+            if (listItem) listItem.classList.add('found');
+            foundCount++; document.getElementById('score').innerText = foundCount;
+            if (foundCount === words.length) setTimeout(() => document.getElementById('winModal').style.display = 'flex', 500);
+        }
+    }
+
+    function drawFoundLines() {
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        if (gridEl.children.length === 0) return;
+        const lineWidth = (canvas.width / width) * 0.7;
+        words.filter(w => w.found).forEach(w => {
+            const start = getCellCenter(w.indices[0]); const end = getCellCenter(w.indices[w.indices.length - 1]);
+            ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(end.x, end.y);
+            ctx.strokeStyle = 'rgba(46, 204, 113, 0.5)'; ctx.lineWidth = lineWidth; ctx.lineCap = 'round'; ctx.stroke();
+        });
+    }
+
+    gridEl.addEventListener('mousedown', startSelection); window.addEventListener('mousemove', moveSelection); window.addEventListener('mouseup', endSelection);
+    gridEl.addEventListener('touchstart', startSelection, {passive: false}); window.addEventListener('touchmove', moveSelection, {passive: false}); window.addEventListener('touchend', endSelection);
+</script>
+</body>
+</html>
